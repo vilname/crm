@@ -1,0 +1,10 @@
+.wrap {
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.formRow {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}

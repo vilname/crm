@@ -1,0 +1,110 @@
+version: '3.8'
+
+services:
+#  gateway:
+#    build:
+#      context: gateway/docker
+#      dockerfile: development/nginx/Dockerfile
+#    container_name: crm_gateway
+#    ports:
+#      - "8080:8080"
+#      - "8081:8081"
+#    networks:
+#      - crm_network
+
+  frontend:
+    build:
+      context: frontend/docker/development/nginx
+    container_name: crm_frontend
+    ports:
+      - "80:80"
+    networks:
+      - crm_network
+
+  frontend-node:
+    build:
+      context: frontend/docker/development/node
+    container_name: crm_frontend_node
+    environment:
+      WDS_SOCKET_PORT: 0
+      WATCHPACK_POLLING: true
+    volumes:
+      - ./frontend:/app
+    #    command: sh -c "until [ -f .ready ] ; do sleep 1 ; done && yarn start"
+    command: npm start
+    tty: true
+    networks:
+      - crm_network
+
+  frontend-node-cli:
+    build:
+      context: frontend/docker/development/node
+    container_name: crm_frontend_node_cli
+    volumes:
+      - ./frontend:/app
+    networks:
+      - crm_network
+
+  api:
+    build:
+      context: api
+      dockerfile: docker/development/Dockerfile
+    container_name: crm_api
+    ports:
+      - "8181:8181"
+    env_file:
+      - .env
+    restart: on-failure
+    networks:
+      - crm_network
+
+  api-cli:
+    build:
+      context: api
+      dockerfile: docker/development/cli/Dockerfile
+    container_name: crm_api_cli
+    env_file:
+      - .env
+    networks:
+      - crm_network
+
+  db:
+    build:
+      context: api/docker
+      dockerfile: development/db/Dockerfile
+    container_name: crm_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - crm_network
+
+  # PgAdmin 4
+  pgadmin:
+    image: dpage/pgadmin4:8.7
+    container_name: crm_pg_admin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com  # Логин для входа
+      PGADMIN_DEFAULT_PASSWORD: 12345        # Пароль
+      PGADMIN_LISTEN_PORT: 83                  # Порт внутри контейнера
+    ports:
+      - "8083:83"  # Доступ на http://localhost:8083
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin  # Сохранение данных между перезапусками
+    depends_on:
+      - db
+    networks:
+      - crm_network
+
+networks:
+  crm_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  pgadmin_data:

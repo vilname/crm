@@ -1,0 +1,10 @@
+api/.idea
+api/docs
+api/logs
+api/.env
+frontend/node_modules
+frontend/.env
+frontend/.idea
+
+.idea
+.env

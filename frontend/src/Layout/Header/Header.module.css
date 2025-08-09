@@ -1,0 +1,14 @@
+.wrap {
+  width: 980px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 100px 205px;
+  justify-content: center;
+  column-gap: 20px;
+}
+
+.item {
+  font-size: 25px;
+  color: black;
+  padding: 10px 0;
+}
