@@ -1,13 +1,10 @@
 package config
 
 import (
-	"api/docs"
 	"api/src/controller/rest"
 	"api/src/util/middleware"
 
 	"github.com/gin-gonic/gin"
-	swaggerfiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func InitRoute() *gin.Engine {
@@ -22,8 +19,8 @@ func InitRoute() *gin.Engine {
 	answer.GET("/get/:id", rest.GetAnswer)
 	answer.POST("/create", rest.CreateAnswer)
 
-	docs.SwaggerInfo.BasePath = ""
-	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+// 	docs.SwaggerInfo.BasePath = ""
+// 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	return router
 }
