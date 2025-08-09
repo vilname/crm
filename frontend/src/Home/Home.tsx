@@ -1,16 +1,6 @@
 import React from 'react'
 import styles from './Home.module.css'
 
-interface StreamingData {
-    id: number;
-    text: string;
-}
-
-interface State {
-    chunks: StreamingData[]; // Массив полученных данных
-    loading: boolean;
-    error: string | null;
-}
 
 class Home extends React.Component {
 
@@ -94,15 +84,8 @@ class Home extends React.Component {
             const {done, value} = await reader.read();
             if (done) break;
 
-            // Декодируем бинарные данные в текст
             buffer = decoder.decode(value, {stream: true});
-
-            console.log('buffer-str', buffer)
-            // console.log('buffer', JSON.parse(buffer))
-
-            // Разделяем буфер по строкам (для NDJSON)
             const lines = buffer.split('\n');
-            // buffer = lines.pop() || ''; // Сохраняем неполную строку
 
             let messageObj = {}
             for (let i = 0; i < lines.length; i++) {
@@ -111,13 +94,9 @@ class Home extends React.Component {
                 }
 
                 messageObj = JSON.parse(lines[i])
-
                 text += messageObj.message.content
 
                 this.setState({answer: text})
-
-                // console.log('text1', text1)
-                console.log('lines', JSON.parse(lines[i]))
             }
 
             if (messageObj.done) {
@@ -132,57 +111,6 @@ class Home extends React.Component {
                     })
                 })
             }
-
-            // Парсим каждую строку и обновляем состояние
-            // const newChunks = lines
-            //     .map(line => {
-            //         try {
-            //             return JSON.parse(line) as StreamingData;
-            //         } catch (e) {
-            //             console.error('Parse error:', e);
-            //             return null;
-            //         }
-            //     })
-            //     .filter(Boolean) as StreamingData[]; // Фильтруем null
-            //
-            // // console.log('message', newChunks[0].message.content)
-            // console.log('newChunks', newChunks)
-            //
-            // // console.log('buffer', buffer)
-            //
-            // for (let i = 0; i < newChunks.length; i++) {
-            //     let chunk = newChunks[i]
-            //
-            //     // let message = this.state.answer + chunk.message.content
-            //
-            //     // console.log('value', value)
-            //
-            //     // const message = decoder.decode(value, { stream: true });
-            //     //
-            //     //
-            //     // // console.log('message', message)
-            //     //
-            //     // // this.setState({answer: message})
-            //     //
-            //     // this.setState(prevState => ({
-            //     //     receivedText: prevState.answer + message
-            //     // }));
-            //
-            //     if (chunk.done) {
-            //         fetch(process.env.REACT_APP_API_URL+'/answer/create', {
-            //             method: 'POST',
-            //             headers: {
-            //                 'Content-Type': 'application/json'
-            //             },
-            //             body: JSON.stringify({
-            //                 title: this.state.formData.question,
-            //                 text: this.state.answer,
-            //             })
-            //         })
-            //     }
-            // }
-
-
         }
     }
 
