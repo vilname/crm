@@ -51,7 +51,7 @@ const AnswerList = () => {
 
             {/* Список элементов */}
             <ul className="items-list">
-                {items.map((item: Item) => (
+                {items && items.map((item: Item) => (
                     <div>
                         <h2><Link to={`/get/${item.id}`}>{item.title}</Link></h2>
                         <div>{item.text}</div>

@@ -25,7 +25,7 @@ func NewAnswerRepository(ctx *gin.Context) *AnswerRepository {
 func (repository *AnswerRepository) GetList(limit uint16, offset uint16) ([]model.Answer, error) {
 	var answerList []model.Answer
 
-	query := `select * from answers limit $1 offset $2`
+	query := `select * from answers order by id desc limit $1 offset $2`
 
 	rows, err := repository.db.Query(repository.ctx, query, limit, offset)
 	if err != nil {
