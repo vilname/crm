@@ -52,6 +52,44 @@ class Home extends React.Component {
             });
     }
 
+    escapeHtml = (unsafe: string) => {
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    formatResponse = (text: string) => {
+        const self = this;
+
+        // Сохраняем переносы строк
+        let formatted = text.replace(/\n/g, '<br>');
+
+        // Обрабатываем код (блоки кода между ```)
+        formatted = formatted.replace(/```(\w+)?\s([\s\S]*?)```/g, function(match, lang, code) {
+            lang = lang || '';
+            return `
+            <div class="code-block">
+                <button class="copy-btn">Копировать</button>
+                <pre><code class="language-${lang}">${self.escapeHtml(code.trim())}</code></pre>
+            </div>
+        `;
+        });
+
+        // Обрабатываем inline код (между `)
+        formatted = formatted.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+        // Обрабатываем жирный текст (**текст**)
+        formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+        // Обрабатываем курсив (*текст*)
+        formatted = formatted.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+
+        return formatted;
+    }
+
     handleSubmit = async (event: React.MouseEvent<HTMLElement>) => {
 
         event.preventDefault();
@@ -118,6 +156,8 @@ class Home extends React.Component {
 
                         if (content) {
                             text += content
+                            text = this.formatResponse(text)
+
                             this.setState({answer: text})
                         }
                     } catch (e) {
@@ -136,7 +176,11 @@ class Home extends React.Component {
         return (
             <div className={styles.wrap}>
                 <h1>Заголовок</h1>
-                <div className={styles.questionText}>{this.state.answer}</div>
+                {/*<div className={styles.questionText}>{this.state.answer}</div>*/}
+                <div
+                    className={styles.questionText}
+                    dangerouslySetInnerHTML={{ __html: this.state.answer }}
+                />
                 <div>
                     <form className="form" method="post" onSubmit={this.handleSubmit}>
                         <div className={styles.formRow}>
