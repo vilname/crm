@@ -58,16 +58,18 @@ class Home extends React.Component {
 
         const question = this.state.formData.question + "\n" + this.state.formData.fileText
 
-        const response = await fetch(process.env.REACT_APP_DEEPSEEK_URL + '/api/chat', {
+        const response = await fetch(process.env.REACT_APP_DEEPSEEK_URL + '/chat/completions', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + process.env.REACT_APP_DEEPSEEK_KEY
             },
             body: JSON.stringify({
-                "model": "deepseek-r1:8b",
+                "model": "deepseek-chat",
                 "messages": [
                     {"role": "user", "content": question}
-                ]
+                ],
+                "stream": true
             })
         })
 
@@ -84,33 +86,46 @@ class Home extends React.Component {
             const {done, value} = await reader.read();
             if (done) break;
 
-            buffer = decoder.decode(value, {stream: true});
-            const lines = buffer.split('\n');
+            const chunk = decoder.decode(value);
+            const lines = chunk.split('\n').filter(line => line.trim());
 
-            let messageObj = {}
-            for (let i = 0; i < lines.length; i++) {
-                if (!lines[i].length) {
-                    continue
+            // console.log('lines', lines)
+
+            for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                    const data = line.slice(6);
+                    if (data === '[DONE]') {
+                        console.log('\n\nЗавершено');
+
+                        fetch(process.env.REACT_APP_API_URL+'/answer/create', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                title: this.state.formData.question,
+                                text: this.state.answer,
+                            })
+                        })
+                        return;
+                    }
+
+                    try {
+                        const parsed = JSON.parse(data);
+
+                        const content = parsed.choices[0]?.delta?.content;
+                        console.log('content', content)
+
+                        if (content) {
+                            text += content
+                            this.setState({answer: text})
+                        }
+                    } catch (e) {
+                        console.error('Ошибка парсинга:', e);
+                    }
                 }
-
-                messageObj = JSON.parse(lines[i])
-                text += messageObj.message.content
-
-                this.setState({answer: text})
             }
 
-            if (messageObj.done) {
-                fetch(process.env.REACT_APP_API_URL+'/answer/create', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        title: this.state.formData.question,
-                        text: this.state.answer,
-                    })
-                })
-            }
         }
     }
 
