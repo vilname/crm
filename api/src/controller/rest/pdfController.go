@@ -17,37 +17,45 @@ type Pdf struct {
 }
 
 func TextFromPdf(ctx *gin.Context) {
-	file, err := ctx.FormFile("file")
+	//file, err := ctx.FormFile("file")
+
+	form, err := ctx.MultipartForm()
 
 	if err != nil {
 		helper.ErrorResponseMethod(ctx, err)
 		return
 	}
 
-	fOpen, err := file.Open()
+	files := form.File["file"]
 
-	if err != nil {
-		helper.ErrorResponseMethod(ctx, err)
-		return
-	}
+	text := ""
+	for _, file := range files {
+		fOpen, err := file.Open()
 
-	defer fOpen.Close()
+		if err != nil {
+			helper.ErrorResponseMethod(ctx, err)
+			return
+		}
 
-	data := make([]byte, file.Size)
-	_, err = fOpen.Read(data)
+		defer fOpen.Close()
 
-	if err != nil {
-		helper.ErrorResponseMethod(ctx, err)
-		return
-	}
+		data := make([]byte, file.Size)
+		_, err = fOpen.Read(data)
 
-	reader := bytes.NewReader(data)
+		if err != nil {
+			helper.ErrorResponseMethod(ctx, err)
+			return
+		}
 
-	text, err := extractTextFromPDFBytes(reader, file.Size)
+		reader := bytes.NewReader(data)
 
-	if err != nil {
-		helper.ErrorResponseMethod(ctx, err)
-		return
+		textTmp, err := extractTextFromPDFBytes(reader, file.Size)
+		text += textTmp + "\n"
+
+		if err != nil {
+			helper.ErrorResponseMethod(ctx, err)
+			return
+		}
 	}
 
 	ctx.JSON(http.StatusOK, text)

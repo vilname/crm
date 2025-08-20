@@ -32,7 +32,10 @@ class Home extends React.Component {
         }
 
         const formData = new FormData();
-        formData.append('file', event.target.files[0]);
+
+        for (const item of event.target.files) {
+            formData.append('file', item);
+        }
 
         fetch(process.env.REACT_APP_API_URL+'/pdf/text', {
             method: 'POST',
@@ -46,7 +49,7 @@ class Home extends React.Component {
                 this.setState({
                     formData: {
                         ...this.state.formData,
-                        fileText: data
+                        fileText: this.state.formData.fileText + data
                     }
                 });
             });
@@ -95,6 +98,11 @@ class Home extends React.Component {
         event.preventDefault();
 
         const question = this.state.formData.question + "\n" + this.state.formData.fileText
+
+        if (question.length == 1) {
+            return;
+        }
+
 
         const response = await fetch(process.env.REACT_APP_DEEPSEEK_URL + '/chat/completions', {
             method: 'POST',
@@ -184,7 +192,7 @@ class Home extends React.Component {
                 <div>
                     <form className="form" method="post" onSubmit={this.handleSubmit}>
                         <div className={styles.formRow}>
-                            <input type="file" name="file" onChange={this.handleFileChange} />
+                            <input type="file" name="file" onChange={this.handleFileChange} multiple  />
                         </div>
                         <div className={styles.formRow}>
                             <label className="input-label" htmlFor="question">Введите текст</label>
@@ -193,7 +201,6 @@ class Home extends React.Component {
                                 name="question"
                                 value={this.state.formData.question}
                                 onChange={this.handleChange}
-                                required
                             >
                             </textarea>
                             <input type="hidden" name="fileText" value={this.state.formData.fileText}/>
