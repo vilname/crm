@@ -35,30 +35,6 @@ func main() {
 		db.Close()
 	}()
 
-	//message := Message{
-	//	Role:    "user",
-	//	Content: "Привет deepSeek",
-	//}
-
-	//messages := Messages{
-	//	Model: "deepseek-chat",
-	//	Messages: []Message{
-	//		{
-	//			Role:    "user",
-	//			Content: "Привет deepSeek",
-	//		},
-	//		{
-	//			Role:    "system",
-	//			Content: "You are a helpful assistant.",
-	//		},
-	//	},
-	//}
-	//
-	//message, _ := json.Marshal(messages)
-	//
-	//a, err := helper.PostWebClient("https://api.deepseek.com/chat/completions", message)
-	//_ = a
-
 	fmt.Println("init")
 
 	err = router.Run(":" + os.Getenv("PORT"))

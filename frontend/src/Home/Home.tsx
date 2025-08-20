@@ -33,8 +33,32 @@ class Home extends React.Component {
 
         const formData = new FormData();
 
-        for (const item of event.target.files) {
-            formData.append('file', item);
+        for (const file of event.target.files) {
+            console.log('item', file)
+
+            // if (file.type === 'application/pdf') {
+            //     console.log('pdf')
+            // } else {
+            //     const reader = new FileReader()
+            //     console.log('reader', reader)
+            //
+            //     reader.onload = (e) => {
+            //         console.log('e', e)
+            //
+            //         // e.target points to the reader
+            //         const textContent = e.target.result
+            //         console.log(`The content of ${file.name} is ${textContent}`)
+            //     }
+            //
+            //     // this.setState({
+            //     //     formData: {
+            //     //         ...this.state.formData,
+            //     //         fileText: this.state.formData.fileText + data
+            //     //     }
+            //     // });
+            // }
+
+            formData.append('file', file);
         }
 
         fetch(process.env.REACT_APP_API_URL+'/pdf/text', {
